@@ -2,3 +2,105 @@ validação de cpf
 https://laennder.com/como-e-feito-o-calculo-de-validacao-cpf/
 
 
+code:
+
+import sys
+import os
+import time
+
+
+clear_string = "clear"
+log_file = open('logfile_config_port-'+time.strftime("%Y%m%d%H%M%S",time.localtime())+'.log', 'w')
+log_flag = True
+
+def writeLog(msg):
+	global log_file, log_flag
+
+	if log_flag == True:
+		log_file.write(time.strftime("%Y-%m-%d_%H-%M-%S",time.localtime()) + " - " + msg + '\n')
+
+
+#-----------------------------------------------------------------------------
+#	validaCpf
+#-----------------------------------------------------------------------------
+def validaCpf():
+
+	# Make a validation on the above information:
+	sCPF	= raw_input("Digite CPF a ser validado: ")
+
+	if len(sCPF) != 11:
+		writeLog("CPF: %s nao tem 11 digitos!\n" % sCPF)
+		return False
+	elif sCPF.isdigit() != True:
+		writeLog("CPF: %s deve ser composto somente por digitos numericos!\n" % sCPF)
+		return False
+
+	# Distribua os 9 primeiros dígitos do CPF na primeira linha de uma tabela,
+	# e na linha abaixo distribua os pesos 10, 9, 8, 7, 6, 5, 4, 3, 2
+	iTot1	= int(sCPF[0])*10 + int(sCPF[1])*9 + int(sCPF[2])*8 + int(sCPF[3])*7 + int(sCPF[4])*6 + int(sCPF[5])*5 + int(sCPF[6])*4 + int(sCPF[7])*3 + int(sCPF[8])*2
+	iTotRs1	= iTot1%11
+
+	writeLog("trace - total: %d\n" % iTot1)
+	writeLog("trace - resto: %d\n" % iTotRs1)
+
+	iDigVerif = 11 - iTotRs1
+	if iDigVerif > 9:
+		iDigVerif = 0
+
+	iTot2	= int(sCPF[0])*11 + int(sCPF[1])*10 + int(sCPF[2])*9 + int(sCPF[3])*8 + int(sCPF[4])*7 + int(sCPF[5])*6 + int(sCPF[6])*5 + int(sCPF[7])*4 + int(sCPF[8])*3 + iDigVerif*2
+	iTotRs2	= iTot2%11
+
+	writeLog("trace - total2: %d\n" % iTot2)
+	writeLog("trace - resto2: %d\n" % iTotRs2)
+
+	iDigVerif2 = 11 - iTotRs2
+	if iDigVerif2 > 9:
+		iDigVerif2 = 0
+
+	sCPFValido	= ("%s%s%s" % (sCPF[:9], str(iDigVerif), str(iDigVerif2)))
+	writeLog("trace - sCPF: [%s]\n" % sCPF)
+	writeLog("trace - sCPFValido: [%s]\n" % sCPFValido)
+	if str(sCPF) != str(sCPFValido):
+		writeLog("CPF: %s invalido. Deveria ser %s\n" % (sCPF, sCPFValido))
+		return False
+	return True
+
+#-----------------------------------------------------------------------------
+#	Main function - selection of user action
+#-----------------------------------------------------------------------------
+def main():
+
+	os.system(clear_string)
+
+	sSelection	= ""
+	lFiles		= []
+
+	while True:
+		os.system(clear_string)
+		sSelection	= raw_input ("""
+		validador de cpf:
+		1) validar cpf
+		2) validar cnpj
+		0) Sair
+		Opcao: """)
+
+		sSelection.strip()
+		sSelection.lstrip('0')
+
+		if sSelection == '1':
+			sts = validaCpf()
+			if sts == True:
+				raw_input("CPF valido!")
+			else:
+				raw_input("CPF invalido!")
+#		elif sSelection == '2':
+#			raw_input(history)
+#			os.system(clear_string)
+		elif sSelection == '0':
+			print "saindo..."
+			time.sleep(.5)
+			os.system(clear_string)
+			sys.exit()
+
+if __name__ == "__main__":
+	main()
